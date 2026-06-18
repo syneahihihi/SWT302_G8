@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LibraryMS – Hệ thống Quản lý Thư viện</title>
+  <meta name="description"
+    content="Hệ thống Quản lý Thư viện hiện đại – Quản lý sách, mượn/trả, thành viên và báo cáo." />
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+  <!-- ========== TOAST CONTAINER ========== -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- ========== LOGIN PAGE ========== -->
+  <div id="login-page">
+    <div class="login-grid-bg"></div>
+    <div class="login-card">
+      <div class="login-logo">
+        <div class="login-logo-icon">📚</div>
+        <div>
+          <h1>LibraryMS</h1>
+          <span>Hệ thống Quản lý Thư viện</span>
+        </div>
+      </div>
+      <h2 class="login-title">Đăng nhập</h2>
+      <p class="login-subtitle">Chào mừng trở lại! Vui lòng đăng nhập để tiếp tục.</p>
+
+      <div class="demo-accounts">
+        <h4>🔑 Tài khoản demo – Click để điền tự động</h4>
+        <div class="demo-account-item" onclick="fillLogin('admin','admin123')">
+          <div>
+            <div style="font-size:13px;font-weight:600">admin</div>
+            <div class="demo-cred">admin / admin123</div>
+          </div>
+          <span class="demo-role-badge badge-admin">Admin</span>
+        </div>
+        <div class="demo-account-item" onclick="fillLogin('librarian1','lib123')">
+          <div>
+            <div style="font-size:13px;font-weight:600">librarian1</div>
+            <div class="demo-cred">librarian1 / lib123</div>
+          </div>
+          <span class="demo-role-badge badge-librarian">Thủ thư</span>
+        </div>
+        <div class="demo-account-item" onclick="fillLogin('student1','stu123')">
+          <div>
+            <div style="font-size:13px;font-weight:600">student1</div>
+            <div class="demo-cred">student1 / stu123</div>
+          </div>
+          <span class="demo-role-badge badge-member">Sinh viên</span>
+        </div>
+      </div>
+
+      <form id="loginForm" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label class="form-label" for="loginUsername">Tên đăng nhập</label>
+          <input class="form-control" type="text" id="loginUsername" placeholder="Nhập tên đăng nhập..." required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="loginPassword">Mật khẩu</label>
+          <input class="form-control" type="password" id="loginPassword" placeholder="Nhập mật khẩu..." required />
+        </div>
+        <div id="loginError" class="alert-box alert-danger hidden">
+          ⚠️ Tên đăng nhập hoặc mật khẩu không đúng!
+        </div>
+        <button class="btn btn-primary btn-full btn-lg" type="submit" id="loginBtn">
+          <span>Đăng nhập</span>
+          <span>→</span>
+        </button>
+      </form>
+      <div class="auth-switch">
+        Chưa có tài khoản? <a href="#" id="goToRegister" onclick="showRegisterForm(event)">Đăng ký ngay</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== REGISTER PAGE ========== -->
+  <div id="register-page" class="hidden">
+    <div class="login-grid-bg"></div>
+    <div class="login-card" style="max-width:500px;">
+      <div class="login-logo">
+        <div class="login-logo-icon">📚</div>
+        <div>
+          <h1>LibraryMS</h1>
+          <span>Hệ thống Quản lý Thư viện</span>
+        </div>
+      </div>
+      <h2 class="login-title">Đăng ký tài khoản</h2>
+      <p class="login-subtitle">Tạo tài khoản sinh viên để sử dụng dịch vụ thư viện.</p>
+
+      <form id="registerForm" onsubmit="handleRegister(event)" novalidate>
+        <!-- Họ tên -->
+        <div class="form-group">
+          <label class="form-label" for="regFullname">Họ và tên <span style="color:var(--accent-rose)">*</span></label>
+          <input class="form-control" type="text" id="regFullname" placeholder="Nguyễn Văn A" autocomplete="name" />
+          <div class="field-error hidden" id="errRegFullname"></div>
+        </div>
+
+        <!-- Mã sinh viên -->
+        <div class="form-group">
+          <label class="form-label" for="regStudentId">Mã sinh viên <span style="color:var(--accent-rose)">*</span></label>
+          <input class="form-control" type="text" id="regStudentId" placeholder="VD: SV2024001" autocomplete="off" />
+          <div class="field-error hidden" id="errRegStudentId"></div>
+        </div>
+
+        <!-- Email -->
+        <div class="form-group">
+          <label class="form-label" for="regEmail">Email <span style="color:var(--accent-rose)">*</span></label>
+          <input class="form-control" type="email" id="regEmail" placeholder="email@student.edu.vn" autocomplete="email" />
+          <div class="field-error hidden" id="errRegEmail"></div>
+        </div>
+
+        <!-- Số điện thoại -->
+        <div class="form-group">
+          <label class="form-label" for="regPhone">Số điện thoại <span style="color:var(--accent-rose)">*</span></label>
+          <input class="form-control" type="tel" id="regPhone" placeholder="0901234567" autocomplete="tel" />
+          <div class="field-error hidden" id="errRegPhone"></div>
+        </div>
+
+        <!-- Tên đăng nhập -->
+        <div class="form-group">
+          <label class="form-label" for="regUsername">Tên đăng nhập <span style="color:var(--accent-rose)">*</span></label>
+          <input class="form-control" type="text" id="regUsername" placeholder="VD: nguyenvana" autocomplete="username"
+            oninput="checkUsernameAvailable(this.value)" />
+          <div class="field-error hidden" id="errRegUsername"></div>
+          <div class="field-hint" id="hintRegUsername"></div>
+        </div>
+
+        <!-- Mật khẩu -->
+        <div class="form-group">
+          <label class="form-label" for="regPassword">Mật khẩu <span style="color:var(--accent-rose)">*</span></label>
+          <div style="position:relative;">
+            <input class="form-control" type="password" id="regPassword" placeholder="Tối thiểu 6 ký tự"
+              autocomplete="new-password" oninput="checkPasswordStrength(this.value)" />
+            <button type="button" class="pw-toggle-btn" id="regPwToggle" onclick="togglePasswordVisibility('regPassword','regPwToggle')" title="Hiện/ẩn mật khẩu">👁</button>
+          </div>
+          <div class="password-strength" id="pwStrengthBar" style="display:none;">
+            <div class="pw-strength-track"><div class="pw-strength-fill" id="pwStrengthFill"></div></div>
+            <span class="pw-strength-label" id="pwStrengthLabel"></span>
+          </div>
+          <div class="field-error hidden" id="errRegPassword"></div>
+        </div>
+
+        <!-- Xác nhận mật khẩu -->
+        <div class="form-group">
+          <label class="form-label" for="regConfirmPassword">Xác nhận mật khẩu <span style="color:var(--accent-rose)">*</span></label>
+          <div style="position:relative;">
+            <input class="form-control" type="password" id="regConfirmPassword" placeholder="Nhập lại mật khẩu"
+              autocomplete="new-password" />
+            <button type="button" class="pw-toggle-btn" id="regCfPwToggle" onclick="togglePasswordVisibility('regConfirmPassword','regCfPwToggle')" title="Hiện/ẩn mật khẩu">👁</button>
+          </div>
+          <div class="field-error hidden" id="errRegConfirmPassword"></div>
+        </div>
+
+        <!-- Điều khoản -->
+        <div class="form-group" style="margin-bottom:8px;">
+          <label class="checkbox-label" id="termsLabel">
+            <input type="checkbox" id="regTerms" />
+            <span>Tôi đồng ý với <a href="#" onclick="return false;" style="color:var(--accent-blue)">điều khoản sử dụng</a> của thư viện</span>
+          </label>
+          <div class="field-error hidden" id="errRegTerms"></div>
+        </div>
+
+        <!-- General error -->
+        <div id="registerError" class="alert-box alert-danger hidden" style="margin-bottom:16px;"></div>
+        <!-- Success -->
+        <div id="registerSuccess" class="alert-box alert-success hidden" style="margin-bottom:16px;"></div>
+
+        <button class="btn btn-primary btn-full btn-lg" type="submit" id="registerBtn">
+          <span>Tạo tài khoản</span>
+          <span>✨</span>
+        </button>
+      </form>
+
+      <div class="auth-switch" style="margin-top:20px;">
+        Đã có tài khoản? <a href="#" onclick="showLoginForm(event)">Đăng nhập</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== MAIN APP ========== -->
+  <div id="app" class="hidden">
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <div class="sidebar-logo-icon">📚</div>
+          <div class="sidebar-logo-text">
+            <h2>LibraryMS</h2>
+            <span>v2.0 – SWT301</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-user">
+        <div class="sidebar-user-avatar" id="sidebarAvatar">👤</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="sidebarName">User</div>
+          <div id="sidebarRole" class="sidebar-user-role"></div>
+        </div>
+        <div class="dot-online"></div>
+      </div>
+
+      <nav class="sidebar-nav" id="sidebarNav"></nav>
+
+      <div class="sidebar-footer">
+        <button class="btn btn-ghost btn-full" onclick="handleLogout()">
+          🚪 Đăng xuất
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+      <!-- TOPBAR -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <div class="page-title" id="topbarTitle">Dashboard</div>
+        </div>
+        <div class="topbar-right">
+          <div class="topbar-search">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="globalSearch" placeholder="Tìm kiếm nhanh..."
+              oninput="globalSearchHandler(this.value)" />
+          </div>
+          <div class="notification-btn" onclick="toggleNotifications()" title="Thông báo">
+            🔔
+            <span class="notif-dot" id="notifDot"></span>
+          </div>
+        </div>
+      </header>
+
+      <!-- PAGE CONTENT -->
+      <main class="page-content" id="pageContent">
+        <!-- Pages rendered here dynamically -->
+      </main>
+    </div>
+  </div>
+
+  <!-- ========== MODALS ========== -->
+
+  <!-- Modal: Thêm/Sửa Sách -->
+  <div class="modal-overlay" id="modalBook">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <div class="modal-title" id="modalBookTitle">Thêm sách mới</div>
+        <button class="modal-close" onclick="closeModal('modalBook')">×</button>
+      </div>
+      <form id="formBook" onsubmit="saveBook(event)">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">ISBN *</label>
+            <input class="form-control" id="bookISBN" placeholder="VD: 978-3-16-148410-0" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tên sách *</label>
+            <input class="form-control" id="bookTitle" placeholder="Nhập tên sách..." required />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Tác giả *</label>
+            <select class="form-control" id="bookAuthor" required></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Danh mục *</label>
+            <select class="form-control" id="bookCategory" required></select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Năm xuất bản</label>
+            <input class="form-control" type="number" id="bookYear" placeholder="2024" min="1900" max="2030" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Số lượng</label>
+            <input class="form-control" type="number" id="bookQuantity" placeholder="1" min="1" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Mô tả</label>
+          <textarea class="form-control" id="bookDescription" placeholder="Mô tả ngắn về sách..."></textarea>
+        </div>
+        <div class="form-group" id="bookStatusGroup" style="display:none">
+          <label class="form-label">Trạng thái</label>
+          <select class="form-control" id="bookStatus">
+            <option value="available">Có sẵn</option>
+            <option value="damaged">Hỏng</option>
+            <option value="lost">Mất</option>
+          </select>
+        </div>
+        <input type="hidden" id="bookEditId" />
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modalBook')">Hủy</button>
+          <button type="submit" class="btn btn-primary">💾 Lưu sách</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Mượn sách -->
+  <div class="modal-overlay" id="modalBorrow">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <div class="modal-title">📖 Tạo phiếu mượn sách</div>
+        <button class="modal-close" onclick="closeModal('modalBorrow')">×</button>
+      </div>
+      <form id="formBorrow" onsubmit="processBorrow(event)">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Thành viên *</label>
+            <select class="form-control" id="borrowMember" required></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Ngày hết hạn</label>
+            <input class="form-control" type="date" id="borrowDueDate" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Chọn sách mượn *</label>
+          <div style="display:flex;gap:8px;margin-bottom:8px;">
+            <input class="form-control" type="text" id="borrowBookSearch" placeholder="Tìm kiếm sách..."
+              oninput="searchBorrowBooks(this.value)" style="flex:1" />
+          </div>
+          <div id="borrowBookList"
+            style="max-height:200px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius-sm);">
+          </div>
+        </div>
+        <div id="selectedBooksDisplay" class="hidden">
+          <label class="form-label">Sách đã chọn:</label>
+          <div id="selectedBooksTags" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modalBorrow')">Hủy</button>
+          <button type="submit" class="btn btn-success">✅ Xác nhận mượn</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Trả sách -->
+  <div class="modal-overlay" id="modalReturn">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">🔄 Xử lý trả sách</div>
+        <button class="modal-close" onclick="closeModal('modalReturn')">×</button>
+      </div>
+      <form id="formReturn" onsubmit="processReturn(event)">
+        <div class="form-group">
+          <label class="form-label">Tìm phiếu mượn</label>
+          <input class="form-control" type="text" id="returnSearch" placeholder="Nhập mã phiếu hoặc tên thành viên..."
+            oninput="searchReturnBorrow(this.value)" />
+        </div>
+        <div id="returnBorrowInfo" class="hidden">
+          <div class="card" style="margin:12px 0;padding:16px;">
+            <div id="returnBorrowDetails"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tình trạng sách trả</label>
+            <select class="form-control" id="returnCondition">
+              <option value="good">Tốt</option>
+              <option value="damaged">Có hư hại</option>
+              <option value="lost">Báo mất</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Ghi chú</label>
+            <textarea class="form-control" id="returnNote" placeholder="Ghi chú thêm..."></textarea>
+          </div>
+          <div id="returnFineInfo" class="hidden">
+            <div class="alert-box alert-warning">
+              ⚠️ Phiếu này có phát sinh phí phạt: <strong id="returnFineAmount"></strong>
+            </div>
+          </div>
+        </div>
+        <input type="hidden" id="returnBorrowId" />
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modalReturn')">Hủy</button>
+          <button type="submit" class="btn btn-primary" id="returnSubmitBtn" disabled>✅ Xác nhận trả</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Thành viên -->
+  <div class="modal-overlay" id="modalMember">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title" id="modalMemberTitle">Thêm thành viên</div>
+        <button class="modal-close" onclick="closeModal('modalMember')">×</button>
+      </div>
+      <form id="formMember" onsubmit="saveMember(event)">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Họ tên *</label>
+            <input class="form-control" id="memberName" placeholder="Nguyễn Văn A" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Mã sinh viên *</label>
+            <input class="form-control" id="memberCode" placeholder="SV001" required />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Email *</label>
+            <input class="form-control" type="email" id="memberEmail" placeholder="email@student.edu.vn" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Số điện thoại</label>
+            <input class="form-control" id="memberPhone" placeholder="0901234567" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Địa chỉ</label>
+          <input class="form-control" id="memberAddress" placeholder="Địa chỉ liên hệ" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tạo tài khoản đăng nhập</label>
+          <div id="memberAccountInfo"
+            style="font-size:12px;color:var(--text-muted);margin-top:6px;padding:10px;background:var(--bg-input);border-radius:8px;">
+          </div>
+        </div>
+        <input type="hidden" id="memberEditId" />
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modalMember')">Hủy</button>
+          <button type="submit" class="btn btn-primary">💾 Lưu</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Tác giả -->
+  <div class="modal-overlay" id="modalAuthor">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title" id="modalAuthorTitle">Thêm tác giả</div>
+        <button class="modal-close" onclick="closeModal('modalAuthor')">×</button>
+      </div>
+      <form id="formAuthor" onsubmit="saveAuthor(event)">
+        <div class="form-group">
+          <label class="form-label">Tên tác giả *</label>
+          <input class="form-control" id="authorName" placeholder="Tên tác giả..." required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Quốc tịch</label>
+          <input class="form-control" id="authorNationality" placeholder="Việt Nam" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tiểu sử ngắn</label>
+          <textarea class="form-control" id="authorBio" placeholder="Giới thiệu về tác giả..."></textarea>
+        </div>
+        <input type="hidden" id="authorEditId" />
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modalAuthor')">Hủy</button>
+          <button type="submit" class="btn btn-primary">💾 Lưu</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Danh mục -->
+  <div class="modal-overlay" id="modalCategory">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title" id="modalCategoryTitle">Thêm danh mục</div>
+        <button class="modal-close" onclick="closeModal('modalCategory')">×</button>
+      </div>
+      <form id="formCategory" onsubmit="saveCategory(event)">
+        <div class="form-group">
+          <label class="form-label">Tên danh mục *</label>
+          <input class="form-control" id="categoryName" placeholder="VD: Khoa học máy tính" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Mô tả</label>
+          <textarea class="form-control" id="categoryDesc" placeholder="Mô tả danh mục..."></textarea>
+        </div>
+        <input type="hidden" id="categoryEditId" />
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modalCategory')">Hủy</button>
+          <button type="submit" class="btn btn-primary">💾 Lưu</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Tài khoản -->
+  <div class="modal-overlay" id="modalAccount">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title" id="modalAccountTitle">Thêm tài khoản</div>
+        <button class="modal-close" onclick="closeModal('modalAccount')">×</button>
+      </div>
+      <form id="formAccount" onsubmit="saveAccount(event)">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Tên đăng nhập *</label>
+            <input class="form-control" id="accountUsername" placeholder="username" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Mật khẩu *</label>
+            <input class="form-control" type="password" id="accountPassword" placeholder="••••••••" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Họ tên *</label>
+            <input class="form-control" id="accountFullname" placeholder="Họ và tên" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Vai trò *</label>
+            <select class="form-control" id="accountRole" required>
+              <option value="Admin">Admin</option>
+              <option value="Librarian">Thủ thư</option>
+              <option value="Member">Sinh viên</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input class="form-control" type="email" id="accountEmail" placeholder="email@example.com" />
+        </div>
+        <input type="hidden" id="accountEditId" />
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modalAccount')">Hủy</button>
+          <button type="submit" class="btn btn-primary">💾 Lưu</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Chi tiết sách -->
+  <div class="modal-overlay" id="modalBookDetail">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <div class="modal-title">📗 Chi tiết sách</div>
+        <button class="modal-close" onclick="closeModal('modalBookDetail')">×</button>
+      </div>
+      <div id="bookDetailContent"></div>
+    </div>
+  </div>
+
+  <!-- Modal: Xác nhận xóa -->
+  <div class="modal-overlay" id="modalConfirm">
+    <div class="modal" style="max-width:400px;">
+      <div class="modal-header">
+        <div class="modal-title">⚠️ Xác nhận</div>
+        <button class="modal-close" onclick="closeModal('modalConfirm')">×</button>
+      </div>
+      <p id="confirmMessage" style="color:var(--text-secondary);margin-bottom:8px;"></p>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('modalConfirm')">Hủy</button>
+        <button class="btn btn-danger" id="confirmBtn">Xác nhận</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+
+</html>
