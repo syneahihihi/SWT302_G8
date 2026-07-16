@@ -63,11 +63,11 @@
       <form id="loginForm" onsubmit="handleLogin(event)">
         <div class="form-group">
           <label class="form-label" for="loginUsername">Tên đăng nhập</label>
-          <input class="form-control" type="text" id="loginUsername" placeholder="Nhập tên đăng nhập..." required />
+          <input class="form-control" type="text" id="loginUsername" placeholder="Nhập tên đăng nhập..." autocomplete="username" required />
         </div>
         <div class="form-group">
           <label class="form-label" for="loginPassword">Mật khẩu</label>
-          <input class="form-control" type="password" id="loginPassword" placeholder="Nhập mật khẩu..." required />
+          <input class="form-control" type="password" id="loginPassword" placeholder="Nhập mật khẩu..." autocomplete="current-password" required />
         </div>
         <div id="loginError" class="alert-box alert-danger hidden">
           ⚠️ Tên đăng nhập hoặc mật khẩu không đúng!
@@ -503,11 +503,11 @@
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">Tên đăng nhập *</label>
-            <input class="form-control" id="accountUsername" placeholder="username" required />
+            <input class="form-control" id="accountUsername" placeholder="username" autocomplete="username" required />
           </div>
           <div class="form-group">
             <label class="form-label">Mật khẩu *</label>
-            <input class="form-control" type="password" id="accountPassword" placeholder="••••••••" />
+            <input class="form-control" type="password" id="accountPassword" placeholder="••••••••" autocomplete="new-password" />
           </div>
         </div>
         <div class="form-row">
@@ -563,9 +563,7 @@
     </div>
   </div>
 
-    <!-- Core -->
-  <script src="assets/js/core/db.js"></script>
-  <script src="assets/js/core/seed-data.js"></script>
+  <!-- Core -->
   <script src="assets/js/core/state.js"></script>
   <script src="assets/js/core/router.js"></script>
 

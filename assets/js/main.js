@@ -3,24 +3,20 @@ function showApp() {
   document.getElementById('login-page').classList.add('hidden');
   document.getElementById('app').classList.remove('hidden');
 
-  // Update sidebar user info
   const roleLabels = { Admin: 'Quản trị viên', Librarian: 'Thủ thư', Member: 'Sinh viên' };
   const roleIcons = { Admin: '👑', Librarian: '📚', Member: '🎓' };
   const roleClasses = { Admin: 'role-admin', Librarian: 'role-librarian', Member: 'role-member' };
 
-  document.getElementById('sidebarAvatar').textContent = roleIcons[currentUser.role];
-  document.getElementById('sidebarName').textContent = currentUser.fullname;
+  document.getElementById('sidebarAvatar').textContent = roleIcons[currentUser.role] || '👤';
+  document.getElementById('sidebarName').textContent = currentUser.fullname || 'Người dùng';
   const roleEl = document.getElementById('sidebarRole');
-  roleEl.textContent = roleLabels[currentUser.role];
-  roleEl.className = 'sidebar-user-role ' + roleClasses[currentUser.role];
+  roleEl.textContent = roleLabels[currentUser.role] || currentUser.role;
+  roleEl.className = 'sidebar-user-role ' + (roleClasses[currentUser.role] || '');
 
-  // Render navigation
   const navMap = { Admin: NAV_ADMIN, Librarian: NAV_LIBRARIAN, Member: NAV_MEMBER };
-  renderSidebar(navMap[currentUser.role]);
+  renderSidebar(navMap[currentUser.role] || NAV_MEMBER);
 
-  // Navigate to dashboard
   navigateTo('dashboard');
-  updateOverdueBadges();
 }
 
 function renderSidebar(navConfig) {
@@ -31,7 +27,6 @@ function renderSidebar(navConfig) {
       <div class="nav-item" id="nav-${item.id}" onclick="navigateTo('${item.id}')">
         <span class="nav-icon">${item.icon}</span>
         <span>${item.label}</span>
-        ${item.badge ? `<span class="nav-badge">${item.badge}</span>` : ''}
       </div>
     `).join('')}
   `).join('');
@@ -87,26 +82,20 @@ function navigateTo(page) {
   if (renderMap[page]) renderMap[page]();
 }
 
-function updateOverdueBadges() {
-  const borrows = DB.get('borrows');
-  const today = new Date().toISOString().split('T')[0];
-  const overdue = borrows.filter(b => !b.returnDate && b.dueDate < today && b.status !== 'returned').length;
-  const dot = document.getElementById('notifDot');
-  if (dot) dot.style.display = overdue > 0 ? '' : 'none';
-}
-
 // ==================== INIT ====================
-function init() {
-  initData();
+async function init() {
   const session = localStorage.getItem('lms_session');
   if (session) {
     try {
       const acc = JSON.parse(session);
-      const fresh = DB.get('accounts').find(a => a.id === acc.id);
-      if (fresh && fresh.status === 'active') {
-        currentUser = fresh;
-        showApp();
-        return;
+      const res = await fetch('http://localhost:8080/api/accounts/' + acc.id);
+      if (res.ok) {
+        const fresh = await res.json();
+        if (fresh && fresh.status === 'active') {
+          currentUser = fresh;
+          showApp();
+          return;
+        }
       }
     } catch (e) { }
     localStorage.removeItem('lms_session');
@@ -114,11 +103,8 @@ function init() {
   document.getElementById('login-page').classList.remove('hidden');
 }
 
-// Keyboard shortcuts
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
-  if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); document.getElementById('globalSearch')?.focus(); }
 });
 
-// Start app
 init();
