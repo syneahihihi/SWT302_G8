@@ -1,5 +1,5 @@
 // ==================== AUTH ====================
-function handleLogin(e) {
+async function handleLogin(e) {
   e.preventDefault();
   const username = document.getElementById('loginUsername').value.trim();
   const password = document.getElementById('loginPassword').value;
@@ -10,29 +10,38 @@ function handleLogin(e) {
   btn.disabled = true;
   errorEl.classList.add('hidden');
 
-  setTimeout(() => {
-    const accounts = DB.get('accounts');
-    const account = accounts.find(a => a.username === username && a.password === password);
+  try {
+      const res = await fetch('http://localhost:8080/api/accounts');
+      if (!res.ok) throw new Error("Failed to fetch");
+      const accounts = await res.json();
+      
+      const account = accounts.find(a => a.username === username && a.password === password);
 
-    if (!account) {
+      if (!account) {
+        errorEl.textContent = '⚠️ Tên đăng nhập hoặc mật khẩu không đúng!';
+        errorEl.classList.remove('hidden');
+        btn.innerHTML = '<span>Đăng nhập</span><span>→</span>';
+        btn.disabled = false;
+        return;
+      }
+
+      if (account.status === 'locked') {
+        errorEl.textContent = '🔒 Tài khoản đã bị khóa. Liên hệ admin để được hỗ trợ.';
+        errorEl.classList.remove('hidden');
+        btn.innerHTML = '<span>Đăng nhập</span><span>→</span>';
+        btn.disabled = false;
+        return;
+      }
+
+      currentUser = account;
+      localStorage.setItem('lms_session', JSON.stringify(account));
+      showApp();
+  } catch(error) {
+      errorEl.textContent = '⚠️ Không thể kết nối đến máy chủ API!';
       errorEl.classList.remove('hidden');
       btn.innerHTML = '<span>Đăng nhập</span><span>→</span>';
       btn.disabled = false;
-      return;
-    }
-
-    if (account.status === 'locked') {
-      errorEl.textContent = '🔒 Tài khoản đã bị khóa. Liên hệ admin để được hỗ trợ.';
-      errorEl.classList.remove('hidden');
-      btn.innerHTML = '<span>Đăng nhập</span><span>→</span>';
-      btn.disabled = false;
-      return;
-    }
-
-    currentUser = account;
-    localStorage.setItem('lms_session', JSON.stringify(account));
-    showApp();
-  }, 600);
+  }
 }
 
 function fillLogin(u, p) {
@@ -53,4 +62,3 @@ function handleLogout() {
   if (btn) { btn.innerHTML = '<span>Đăng nhập</span><span>→</span>'; btn.disabled = false; }
   showToast('Đã đăng xuất thành công', 'info');
 }
-
