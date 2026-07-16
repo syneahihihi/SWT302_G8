@@ -7,7 +7,13 @@
   <title>LibraryMS – Hệ thống Quản lý Thư viện</title>
   <meta name="description"
     content="Hệ thống Quản lý Thư viện hiện đại – Quản lý sách, mượn/trả, thành viên và báo cáo." />
-  <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="assets/css/base.css" />
+  <link rel="stylesheet" href="assets/css/layout.css" />
+  <link rel="stylesheet" href="assets/css/components.css" />
+  <link rel="stylesheet" href="assets/css/utilities.css" />
+  <link rel="stylesheet" href="assets/css/pages/auth.css" />
+  <link rel="stylesheet" href="assets/css/pages/dashboard.css" />
+  <link rel="stylesheet" href="assets/css/pages/reports.css" />
 </head>
 
 <body>
@@ -557,7 +563,40 @@
     </div>
   </div>
 
-  <script src="app.js"></script>
+    <!-- Core -->
+  <script src="assets/js/core/db.js"></script>
+  <script src="assets/js/core/seed-data.js"></script>
+  <script src="assets/js/core/state.js"></script>
+  <script src="assets/js/core/router.js"></script>
+
+  <!-- Auth -->
+  <script src="assets/js/auth/login.js"></script>
+  <script src="assets/js/auth/register.js"></script>
+
+  <!-- Modules -->
+  <script src="assets/js/modules/dashboard.js"></script>
+  <script src="assets/js/modules/books.js"></script>
+  <script src="assets/js/modules/categories.js"></script>
+  <script src="assets/js/modules/authors.js"></script>
+  <script src="assets/js/modules/members.js"></script>
+  <script src="assets/js/modules/accounts.js"></script>
+  <script src="assets/js/modules/borrows.js"></script>
+  <script src="assets/js/modules/borrow-process.js"></script>
+  <script src="assets/js/modules/return-process.js"></script>
+  <script src="assets/js/modules/violations.js"></script>
+  <script src="assets/js/modules/my-borrows.js"></script>
+  <script src="assets/js/modules/my-violations.js"></script>
+  <script src="assets/js/modules/reports.js"></script>
+  <script src="assets/js/modules/config.js"></script>
+
+  <!-- Shared -->
+  <script src="assets/js/shared/helpers.js"></script>
+  <script src="assets/js/shared/modal.js"></script>
+  <script src="assets/js/shared/toast.js"></script>
+  <script src="assets/js/shared/search.js"></script>
+
+  <!-- Main -->
+  <script src="assets/js/main.js"></script>
 </body>
 
 </html>
