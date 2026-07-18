@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="vi" data-bs-theme="dark">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LibraryMS – Hệ thống Quản lý Thư viện</title>
+  <meta name="description" content="Hệ thống Quản lý Thư viện hiện đại – Quản lý sách, mượn/trả, thành viên và báo cáo." />
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script type="module" crossorigin src="/assets/index-DE6Pyl7T.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-C7GHbuHV.css">
+</head>
+
+<body>
+
+  <!-- ========== TOAST CONTAINER (Handled dynamically) ========== -->
+  <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1080;" id="toastContainer"></div>
+
+  <!-- ========== LOGIN PAGE ========== -->
+  <div id="login-page" class="d-none">
+    <div class="container d-flex align-items-center justify-content-center min-vh-100 py-5">
+      <div class="card auth-card p-4 w-100" style="max-width: 480px;">
+        <div class="text-center mb-4">
+          <div class="display-5 text-primary mb-2"><i class="bi bi-book-half"></i></div>
+          <h2 class="fw-bold mb-1">LibraryMS</h2>
+          <span class="text-muted small">Hệ thống Quản lý Thư viện</span>
+        </div>
+        
+        <h4 class="fw-semibold text-center mb-3">Đăng nhập</h4>
+        <p class="text-muted text-center small mb-4">Chào mừng trở lại! Vui lòng nhập tài khoản để tiếp tục.</p>
+
+        <!-- Demo Accounts Accordion -->
+        <div class="accordion accordion-dark mb-4" id="demoAccountsAcc">
+          <div class="accordion-item bg-dark border-secondary">
+            <h2 class="accordion-header">
+              <button class="accordion-button collapsed bg-dark-subtle text-light small py-2 fs-7" type="button" data-bs-toggle="collapse" data-bs-target="#demoCollapse" aria-expanded="false" aria-controls="demoCollapse">
+                <i class="bi bi-key-fill me-2 text-warning"></i> Tài khoản demo (Click điền nhanh)
+              </button>
+            </h2>
+            <div id="demoCollapse" class="accordion-collapse collapse" data-bs-parent="#demoAccountsAcc">
+              <div class="accordion-body p-2 d-flex flex-column gap-2 bg-dark">
+                <div class="demo-account-card p-2 d-flex justify-content-between align-items-center" onclick="window.fillLogin('admin','admin123')">
+                  <div>
+                    <span class="fw-semibold text-light fs-7 d-block">admin</span>
+                    <span class="text-muted fs-8">Pass: admin123</span>
+                  </div>
+                  <span class="badge bg-danger">Admin</span>
+                </div>
+                
+                <div class="demo-account-card p-2 d-flex justify-content-between align-items-center" onclick="window.fillLogin('librarian1','lib123')">
+                  <div>
+                    <span class="fw-semibold text-light fs-7 d-block">librarian1</span>
+                    <span class="text-muted fs-8">Pass: lib123</span>
+                  </div>
+                  <span class="badge bg-primary">Thủ thư</span>
+                </div>
+                
+                <div class="demo-account-card p-2 d-flex justify-content-between align-items-center" onclick="window.fillLogin('student1','stu123')">
+                  <div>
+                    <span class="fw-semibold text-light fs-7 d-block">student1</span>
+                    <span class="text-muted fs-8">Pass: stu123</span>
+                  </div>
+                  <span class="badge bg-success">Sinh viên</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <form id="loginForm" onsubmit="window.handleLogin(event)">
+          <div class="mb-3">
+            <label class="form-label text-light small" for="loginUsername">Tên đăng nhập</label>
+            <input class="form-control bg-dark-subtle border-secondary text-white" type="text" id="loginUsername" placeholder="Tên đăng nhập..." autocomplete="username" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label text-light small" for="loginPassword">Mật khẩu</label>
+            <input class="form-control bg-dark-subtle border-secondary text-white" type="password" id="loginPassword" placeholder="Mật khẩu..." autocomplete="current-password" required />
+          </div>
+          
+          <div id="loginError" class="alert alert-danger d-none py-2 fs-7" role="alert"></div>
+          
+          <button class="btn btn-primary w-100 py-2 fw-semibold" type="submit" id="loginBtn">
+            <span>Đăng nhập</span>
+            <i class="bi bi-arrow-right-short ms-1"></i>
+          </button>
+        </form>
+        
+        <div class="text-center mt-4 small">
+          <span class="text-muted">Chưa có tài khoản?</span> 
+          <a href="#" id="goToRegister" onclick="window.showRegisterForm(event)" class="text-primary text-decoration-none fw-semibold ms-1">Đăng ký ngay</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== REGISTER PAGE ========== -->
+  <div id="register-page" class="d-none">
+    <div class="container d-flex align-items-center justify-content-center min-vh-100 py-5">
+      <div class="card auth-card p-4 w-100" style="max-width: 520px;">
+        <div class="text-center mb-4">
+          <div class="display-6 text-primary mb-1"><i class="bi bi-book-half"></i></div>
+          <h2 class="fw-bold mb-0">LibraryMS</h2>
+          <span class="text-muted small">Tạo tài khoản sinh viên mới</span>
+        </div>
+
+        <form id="registerForm" onsubmit="window.handleRegister(event)" novalidate>
+          <div class="mb-3">
+            <label class="form-label text-light small" for="regFullname">Họ và tên *</label>
+            <input class="form-control bg-dark-subtle border-secondary text-white" type="text" id="regFullname" placeholder="Nguyễn Văn A" autocomplete="name" />
+            <div class="invalid-feedback d-none text-danger mt-1 fs-8" id="errRegFullname"></div>
+          </div>
+
+          <div class="row g-2 mb-3">
+            <div class="col-md-6">
+              <label class="form-label text-light small" for="regStudentId">Mã sinh viên *</label>
+              <input class="form-control bg-dark-subtle border-secondary text-white" type="text" id="regStudentId" placeholder="VD: SV2024001" autocomplete="off" />
+              <div class="invalid-feedback d-none text-danger mt-1 fs-8" id="errRegStudentId"></div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label text-light small" for="regPhone">Số điện thoại *</label>
+              <input class="form-control bg-dark-subtle border-secondary text-white" type="tel" id="regPhone" placeholder="0901234567" autocomplete="tel" />
+              <div class="invalid-feedback d-none text-danger mt-1 fs-8" id="errRegPhone"></div>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label text-light small" for="regEmail">Email *</label>
+            <input class="form-control bg-dark-subtle border-secondary text-white" type="email" id="regEmail" placeholder="email@student.edu.vn" autocomplete="email" />
+            <div class="invalid-feedback d-none text-danger mt-1 fs-8" id="errRegEmail"></div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label text-light small" for="regUsername">Tên đăng nhập *</label>
+            <input class="form-control bg-dark-subtle border-secondary text-white" type="text" id="regUsername" placeholder="VD: nguyenvana" autocomplete="username" oninput="window.checkUsernameAvailable(this.value)" />
+            <div class="invalid-feedback d-none text-danger mt-1 fs-8" id="errRegUsername"></div>
+            <div class="form-text fs-8 text-muted" id="hintRegUsername"></div>
+          </div>
+
+          <div class="row g-2 mb-3">
+            <div class="col-md-6">
+              <label class="form-label text-light small" for="regPassword">Mật khẩu *</label>
+              <div class="input-group">
+                <input class="form-control bg-dark-subtle border-secondary text-white" type="password" id="regPassword" placeholder="Từ 6 ký tự" autocomplete="new-password" oninput="window.checkPasswordStrength(this.value)" />
+                <button type="button" class="btn btn-outline-secondary border-secondary" id="regPwToggle" onclick="window.togglePasswordVisibility('regPassword','regPwToggle')" title="Hiện/ẩn mật khẩu">
+                  <i class="bi bi-eye-fill"></i>
+                </button>
+              </div>
+              <div class="progress mt-2" style="height: 5px; display: none;" id="pwStrengthBar">
+                <div class="progress-bar" role="progressbar" style="width: 0%;" id="pwStrengthFill"></div>
+                <div class="fs-8 text-end mt-1 text-muted" id="pwStrengthLabel"></div>
+              </div>
+              <div class="invalid-feedback d-none text-danger mt-1 fs-8" id="errRegPassword"></div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label text-light small" for="regConfirmPassword">Xác nhận mật khẩu *</label>
+              <div class="input-group">
+                <input class="form-control bg-dark-subtle border-secondary text-white" type="password" id="regConfirmPassword" placeholder="Nhập lại..." autocomplete="new-password" />
+                <button type="button" class="btn btn-outline-secondary border-secondary" id="regCfPwToggle" onclick="window.togglePasswordVisibility('regConfirmPassword','regCfPwToggle')" title="Hiện/ẩn mật khẩu">
+                  <i class="bi bi-eye-fill"></i>
+                </button>
+              </div>
+              <div class="invalid-feedback d-none text-danger mt-1 fs-8" id="errRegConfirmPassword"></div>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <div class="form-check small">
+              <input class="form-check-input border-secondary" type="checkbox" id="regTerms" />
+              <label class="form-check-label text-muted" for="regTerms">
+                Tôi đồng ý với <a href="#" onclick="return false;" class="text-primary text-decoration-none fw-semibold">điều khoản sử dụng</a> thư viện
+              </label>
+            </div>
+            <div class="text-danger d-none fs-8 mt-1" id="errRegTerms"></div>
+          </div>
+
+          <div id="registerError" class="alert alert-danger d-none py-2 fs-7" role="alert"></div>
+          <div id="registerSuccess" class="alert alert-success d-none py-2 fs-7" role="alert"></div>
+
+          <button class="btn btn-primary w-100 py-2 fw-semibold" type="submit" id="registerBtn">
+            <span>Tạo tài khoản mới</span>
+            <i class="bi bi-sparkles ms-1"></i>
+          </button>
+        </form>
+
+        <div class="text-center mt-3 small">
+          <span class="text-muted">Đã có tài khoản?</span> 
+          <a href="#" onclick="window.showLoginForm(event)" class="text-primary text-decoration-none fw-semibold ms-1">Đăng nhập</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== MAIN APP LAYER ========== -->
+  <div id="app" class="d-none">
+    
+    <!-- SIDEBAR -->
+    <aside class="sidebar-panel">
+      <!-- Sidebar Header -->
+      <div class="p-3 border-bottom border-secondary d-flex align-items-center gap-2">
+        <div class="fs-4 text-primary"><i class="bi bi-book-half"></i></div>
+        <div>
+          <h5 class="fw-bold mb-0 text-light">LibraryMS</h5>
+          <span class="fs-8 text-muted">v2.0 – Modular Monolith</span>
+        </div>
+      </div>
+
+      <!-- User Profile Card -->
+      <div class="p-3 mx-3 my-3 bg-dark-subtle rounded border border-secondary d-flex align-items-center gap-3">
+        <div class="fs-4 bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;" id="sidebarAvatar">👤</div>
+        <div class="overflow-hidden">
+          <h6 class="fw-semibold mb-0 text-light text-truncate" id="sidebarName">User</h6>
+          <span class="fs-8 text-muted" id="sidebarRole">Vai trò</span>
+        </div>
+      </div>
+
+      <!-- Navigation links (rendered dynamically) -->
+      <div class="flex-grow-1 overflow-auto" id="sidebarNav"></div>
+
+      <!-- Sidebar Footer -->
+      <div class="p-3 border-top border-secondary">
+        <button class="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center gap-2 small py-2" onclick="window.handleLogout()">
+          <i class="bi bi-box-arrow-right"></i>
+          <span>Đăng xuất</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT LAYOUT -->
+    <div class="main-layout">
+      
+      <!-- TOPBAR -->
+      <header class="topbar-panel px-4 d-flex align-items-center justify-content-between">
+        <h4 class="text-light fw-bold mb-0" id="topbarTitle">Dashboard</h4>
+        
+        <div class="d-flex align-items-center gap-3">
+          <!-- Bell Alert Notifications -->
+          <button class="btn btn-outline-secondary border-secondary rounded-circle position-relative p-2" style="width: 40px; height: 40px;" onclick="window.toggleNotifications()" title="Thông báo">
+            <i class="bi bi-bell"></i>
+            <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle" id="notifDot" style="display: none;"></span>
+          </button>
+        </div>
+      </header>
+
+      <!-- PAGE CONTENT INJECTOR -->
+      <main class="page-container" id="pageContent">
+        <!-- Rendered modules inject here -->
+      </main>
+    </div>
+  </div>
+
+  <!-- ========== MODALS SECTION ========== -->
+
+  <!-- Modal: Thêm/Sửa Sách -->
+  <div class="modal fade" id="modalBook" tabindex="-1" aria-labelledby="modalBookLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content bg-dark border-secondary text-light">
+        <div class="modal-header border-secondary">
+          <h5 class="modal-title fw-bold" id="modalBookTitle">Thêm sách mới</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="formBook" onsubmit="window.saveBook(event)">
+          <div class="modal-body">
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label class="form-label small">ISBN *</label>
+                <input class="form-control bg-dark-subtle border-secondary text-white" id="bookISBN" placeholder="VD: 978-3-16-148410-0" required />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small">Tên sách *</label>
+                <input class="form-control bg-dark-subtle border-secondary text-white" id="bookTitle" placeholder="Nhập tên sách..." required />
+              </div>
+            </div>
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label class="form-label small">Tác giả *</label>
+                <select class="form-select bg-dark-subtle border-secondary text-white" id="bookAuthor" required></select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small">Danh mục *</label>
+                <select class="form-select bg-dark-subtle border-secondary text-white" id="bookCategory" required></select>
+              </div>
+            </div>
+            <div class="row g-3 mb-3">
+              <div class="col-md-4">
+                <label class="form-label small">Năm xuất bản</label>
+                <input class="form-control bg-dark-subtle border-secondary text-white" type="number" id="bookYear" placeholder="2024" min="1900" max="2030" />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label small">Số lượng *</label>
+                <input class="form-control bg-dark-subtle border-secondary text-white" type="number" id="bookQuantity" placeholder="1" min="1" required />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label small">Giá sách (VND) *</label>
+                <input class="form-control bg-dark-subtle border-secondary text-white" type="number" id="bookPrice" placeholder="100000" min="0" required />
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small">Mô tả sách</label>
+              <textarea class="form-control bg-dark-subtle border-secondary text-white" id="bookDescription" placeholder="Mô tả ngắn gọn về nội dung sách..." rows="3"></textarea>
+            </div>
+            <input type="hidden" id="bookEditId" />
+          </div>
+          <div class="modal-footer border-secondary bg-dark-subtle">
+            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
+            <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-save me-1"></i> Lưu thông tin</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Thành viên -->
+  <div class="modal fade" id="modalMember" tabindex="-1" aria-labelledby="modalMemberLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-dark border-secondary text-light">
+        <div class="modal-header border-secondary">
+          <h5 class="modal-title fw-bold" id="modalMemberTitle">Thêm thành viên</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="formMember" onsubmit="window.saveMember(event)">
+          <div class="modal-body">
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label class="form-label small">Họ tên *</label>
+                <input class="form-control bg-dark-subtle border-secondary text-white" id="memberName" placeholder="Nguyễn Văn A" required />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small">Mã sinh viên *</label>
+                <input class="form-control bg-dark-subtle border-secondary text-white" id="memberCode" placeholder="SV001" required />
+              </div>
+            </div>
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label class="form-label small">Email *</label>
+                <input class="form-control bg-dark-subtle border-secondary text-white" type="email" id="memberEmail" placeholder="email@student.edu.vn" required />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small">Số điện thoại</label>
+                <input class="form-control bg-dark-subtle border-secondary text-white" id="memberPhone" placeholder="0901234567" />
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small">Địa chỉ</label>
+              <input class="form-control bg-dark-subtle border-secondary text-white" id="memberAddress" placeholder="Địa chỉ liên lạc" />
+            </div>
+            <div class="mb-0">
+              <label class="form-label small">Thông tin đồng bộ</label>
+              <div id="memberAccountInfo" class="p-2 bg-dark-subtle border border-secondary rounded text-secondary fs-8"></div>
+            </div>
+            <input type="hidden" id="memberEditId" />
+          </div>
+          <div class="modal-footer border-secondary bg-dark-subtle">
+            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
+            <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-save me-1"></i> Lưu lại</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Tác giả -->
+  <div class="modal fade" id="modalAuthor" tabindex="-1" aria-labelledby="modalAuthorLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-dark border-secondary text-light">
+        <div class="modal-header border-secondary">
+          <h5 class="modal-title fw-bold" id="modalAuthorTitle">Thêm tác giả</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="formAuthor" onsubmit="window.saveAuthor(event)">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label small">Tên tác giả *</label>
+              <input class="form-control bg-dark-subtle border-secondary text-white" id="authorName" placeholder="Tên tác giả..." required />
+            </div>
+            <div class="mb-3">
+              <label class="form-label small">Quốc tịch</label>
+              <input class="form-control bg-dark-subtle border-secondary text-white" id="authorNationality" placeholder="Việt Nam" />
+            </div>
+            <div class="mb-0">
+              <label class="form-label small">Tiểu sử ngắn</label>
+              <textarea class="form-control bg-dark-subtle border-secondary text-white" id="authorBio" placeholder="Giới thiệu đôi nét về tác giả..." rows="3"></textarea>
+            </div>
+            <input type="hidden" id="authorEditId" />
+          </div>
+          <div class="modal-footer border-secondary bg-dark-subtle">
+            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
+            <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-save me-1"></i> Lưu lại</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Danh mục -->
+  <div class="modal fade" id="modalCategory" tabindex="-1" aria-labelledby="modalCategoryLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-dark border-secondary text-light">
+        <div class="modal-header border-secondary">
+          <h5 class="modal-title fw-bold" id="modalCategoryTitle">Thêm danh mục</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="formCategory" onsubmit="window.saveCategory(event)">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label small">Tên danh mục *</label>
+              <input class="form-control bg-dark-subtle border-secondary text-white" id="categoryName" placeholder="VD: Khoa học máy tính" required />
+            </div>
+            <div class="mb-0">
+              <label class="form-label small">Mô tả</label>
+              <textarea class="form-control bg-dark-subtle border-secondary text-white" id="categoryDesc" placeholder="Mô tả phân loại sách..." rows="3"></textarea>
+            </div>
+            <input type="hidden" id="categoryEditId" />
+          </div>
+          <div class="modal-footer border-secondary bg-dark-subtle">
+            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
+            <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-save me-1"></i> Lưu lại</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Tài khoản -->
+  <div class="modal fade" id="modalAccount" tabindex="-1" aria-labelledby="modalAccountLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content bg-dark border-secondary text-light">
+        <div class="modal-header border-secondary">
+          <h5 class="modal-title fw-bold" id="modalAccountTitle">Thêm tài khoản</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="formAccount" onsubmit="window.saveAccount(event)">
+          <div class="modal-body">
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label class="form-label small">Tên đăng nhập *</label>
+                <input class="form-control bg-dark-subtle border-secondary text-white" id="accountUsername" placeholder="Username" autocomplete="username" required />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small">Mật khẩu *</label>
+                <input class="form-control bg-dark-subtle border-secondary text-white" type="password" id="accountPassword" placeholder="••••••••" autocomplete="new-password" />
+              </div>
+            </div>
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label class="form-label small">Họ tên *</label>
+                <input class="form-control bg-dark-subtle border-secondary text-white" id="accountFullname" placeholder="Họ và tên..." required />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small">Vai trò *</label>
+                <select class="form-select bg-dark-subtle border-secondary text-white" id="accountRole" required>
+                  <option value="Admin">Admin</option>
+                  <option value="Librarian">Thủ thư</option>
+                  <option value="Member">Sinh viên</option>
+                </select>
+              </div>
+            </div>
+            <div class="mb-0">
+              <label class="form-label small">Email</label>
+              <input class="form-control bg-dark-subtle border-secondary text-white" type="email" id="accountEmail" placeholder="email@example.com" />
+            </div>
+            <input type="hidden" id="accountEditId" />
+          </div>
+          <div class="modal-footer border-secondary bg-dark-subtle">
+            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
+            <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-save me-1"></i> Lưu lại</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Chi tiết sách -->
+  <div class="modal fade" id="modalBookDetail" tabindex="-1" aria-labelledby="modalBookDetailLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content bg-dark border-secondary text-light">
+        <div class="modal-header border-secondary bg-dark-subtle">
+          <h5 class="modal-title fw-bold"><i class="bi bi-info-circle text-primary me-2"></i>Chi tiết sách</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" id="bookDetailContent"></div>
+        <div class="modal-footer border-secondary bg-dark-subtle">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Xác nhận xóa -->
+  <div class="modal fade" id="modalConfirm" tabindex="-1" aria-labelledby="modalConfirmLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+      <div class="modal-content bg-dark border-danger text-light">
+        <div class="modal-header border-danger">
+          <h5 class="modal-title fw-bold text-danger"><i class="bi bi-exclamation-triangle-fill me-2"></i>Xác nhận</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body text-light-emphasis small" id="confirmMessage"></div>
+        <div class="modal-footer border-danger bg-dark-subtle">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
+          <button type="button" class="btn btn-danger btn-sm fw-semibold" id="confirmBtn">Xác nhận</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vite module entry point -->
+</body>
+
+</html>
